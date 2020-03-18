@@ -2,71 +2,57 @@ import '../css/reset.css'
 import '../css/styles.css'
 
 const classes = {
-  MENU_OPEN: 'offsite-is-open',
-  MENU_CONTAINER: 'offsite-container'
+  OPEN_MODAL: 'modal-is-open',
+  OPEN_MODAL_BUTTON: 'jsModalOpen',
+  CLOSE_MODAL_BUTTON: 'jsModalClose',
+  MODAL_OVERLAY: 'jsModalOverlay'
 }
 
 const keys = {
   ESQ: 27
 }
 
-const body = document.body
-const menuOpenBtn = document.querySelector('button')
+const { body } = document
 
-menuOpenBtn.addEventListener('click', toggleMenu)
+const openModalBtn = document.querySelector(`.${classes.OPEN_MODAL_BUTTON}`)
+const closeModalBtn = document.querySelector(`.${classes.CLOSE_MODAL_BUTTON}`)
+const modalOverlay = document.querySelector(`.${classes.MODAL_OVERLAY}`)
 
-function addCloseMenuListeners () {
-  document.addEventListener('click', clickOutsideHandler)
-  document.addEventListener('keyup', esqPressedHandler)
+openModalBtn.addEventListener('click', openModal)
+closeModalBtn.addEventListener('click', closeModal)
+
+function openModal () {
+  body.classList.add(classes.OPEN_MODAL)
+  addCloseModealHandlers()
 }
 
-function removeCloseMenuListeners () {
-  document.removeEventListener('click', clickOutsideHandler)
-  document.removeEventListener('keyup', esqPressedHandler)
+function closeModal () {
+  body.classList.remove(classes.OPEN_MODAL)
+  removeCloseModealHandlers()
 }
 
-function toggleMenu () {
-  if (isMenuClose()) {
-    openMenu()
-    addCloseMenuListeners()
-  } else {
-    closeMenu()
-    removeCloseMenuListeners()
+function addCloseModealHandlers () {
+  document.addEventListener('keyup', handleEsqPressed)
+  document.addEventListener('click', handleClickOutside)
+}
+
+function removeCloseModealHandlers () {
+  document.removeEventListener('keyup', handleEsqPressed)
+  document.removeEventListener('click', handleClickOutside)
+}
+
+function isModalOpen () {
+  return body.classList.contains(classes.OPEN_MODAL)
+}
+
+function handleEsqPressed ({ keyCode }) {
+  if (isModalOpen() && keyCode === keys.ESQ) {
+    closeModal()
   }
 }
 
-function clickOutsideHandler ({ target }) {
-  const isMenuClicked = !!target.closest(`.${classes.MENU_CONTAINER}`)
-  const isMenuOpenBtn = target === menuOpenBtn
-  if (isMenuOpen() && !isMenuClicked && !isMenuOpenBtn) {
-    toggleMenu()
+function handleClickOutside ({ target }) {
+  if (isModalOpen() && target === modalOverlay) {
+    closeModal()
   }
-}
-
-function esqPressedHandler ({ keyCode }) {
-  const isEsqPressed = keyCode === keys.ESQ
-  if (isMenuOpen() && isEsqPressed) {
-    toggleMenu()
-  }
-}
-
-function closeMenu () {
-  body.classList.remove(classes.MENU_OPEN)
-}
-
-function openMenu () {
-  body.classList.add(classes.MENU_OPEN)
-}
-
-function isMenuClose () {
-  return !body.classList.contains(classes.MENU_OPEN)
-}
-
-function isMenuOpen () {
-  return body.classList.contains(classes.MENU_OPEN)
-}
-
-// hot reload
-if (process.env.NODE_ENV) {
-  module.hot.accept()
 }
